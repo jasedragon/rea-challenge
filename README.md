@@ -9,17 +9,21 @@ REA Systems Engineer practical task
 
 Deploy the application to AWS
 =============================
-    ```shell $ git clone https://github.com/jasedragon/rea-challenge.git
-    shell $ cd deploy
-    shell $ terraform init # only once
-    shell $ terraform plan
-    shell $ terraform apply```
+```shell 
+$ git clone https://github.com/jasedragon/rea-challenge.git
+$ cd deploy
+$ terraform init # only once
+$ terraform plan
+$ terraform apply
+```
 
 Script 
 inputs - if aws cli is unconfigured, or you wish to use alternative credentials then supply the following environment variables, or wait for terraform to prompt for them. 
-shell $ export AWS_ACCESS_KEY_ID=AKIAIOUQNJUMMEXAMPLE
-shell $ export AWS_SECRET_ACCESS_KEY=3rUIXtGv42kVb/XAAFCE1/BzoDmm5FL5xEXAMPLEKEY
-shell $ export AWS_DEFAULT_REGION=ap-southeast-2
+```shell 
+$ export AWS_ACCESS_KEY_ID=AKIAIOUQNJUMMEXAMPLE
+$ export AWS_SECRET_ACCESS_KEY=3rUIXtGv42kVb/XAAFCE1/BzoDmm5FL5xEXAMPLEKEY
+$ export AWS_DEFAULT_REGION=ap-southeast-2
+```
 
 Reminder: NEVER store credentials in your code repo.
 
@@ -106,7 +110,9 @@ A successful deploy requires local installation of the following tools
 - [Terraform version >=0.13.0](https://www.terraform.io/downloads.html)
 - [Ansible version >=2.9.0](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
   Note: If using an ubuntu based distro, the latest PPA is for 19.10 and didn't work with my 20.04 distro. Ansible was successfully installed with 
-  `shell $ sudo pip3 install ansible
+  ```shell 
+  $ sudo pip3 install ansible
+  ```
 
 
 
