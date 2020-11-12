@@ -35,11 +35,12 @@ security groups
 DNS - setup a CNAME in your dns provider to point to AWS fqdn.
 
 assumptions/design choices:
-using terraform/ansible (widely applicable & agent-less tool) rather than cloudformation (AWS specific)
+using terraform/ansible (widely applicable & agent-less tools) rather than cloudformation (AWS specific)
 terraform backend - local, single user versus remote (S3/dynamodb)
 
-The spec calls for an OS, had this not been the case then building the application as an AWS Lambda function on the ruby runtime may have provided security, mantainability and cost advantages.
-ec2 versus docker or serverless https://docs.aws.amazon.com/lambda/latest/dg/lambda-ruby.html
+The spec calls for an OS, had this not been the case then building the application as an [AWS Lambda function](https://docs.aws.amazon.com/lambda/latest/dg/lambda-ruby.html) on the ruby runtime may have provided security, mantainability and cost advantages.
+
+ec2 versus docker 
 
 ec2 std OS rather than custom image
 internal firewall
@@ -101,9 +102,9 @@ These instructions assume the developer is using a linux OS.
 Windows/OSX users are encouraged to utilise a suitable docker or vm image.
 
 A successful deploy requires local installation of the following tools
-- AWS cli version 2, see https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
-- Terraform version >=0.13.0, see instructions at https://www.terraform.io/downloads.html
-- Ansible version >=2.9.0, https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+- [AWS cli version 2](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html)
+- [Terraform version >=0.13.0](https://www.terraform.io/downloads.html)
+- [Ansible version >=2.9.0](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
   Note: If using an ubuntu based distro, the latest PPA is for 19.10 and didn't work with my 20.04 distro. Ansible was successfully installed with 
   shell $ sudo pip3 install ansible
 
