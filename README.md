@@ -9,11 +9,11 @@ REA Systems Engineer practical task
 
 Deploy the application to AWS
 =============================
-    shell $ git clone https://github.com/jasedragon/rea-challenge.git
+    ```shell $ git clone https://github.com/jasedragon/rea-challenge.git
     shell $ cd deploy
     shell $ terraform init # only once
     shell $ terraform plan
-    shell $ terraform apply
+    shell $ terraform apply```
 
 Script 
 inputs - if aws cli is unconfigured, or you wish to use alternative credentials then supply the following environment variables, or wait for terraform to prompt for them. 
@@ -106,7 +106,7 @@ A successful deploy requires local installation of the following tools
 - [Terraform version >=0.13.0](https://www.terraform.io/downloads.html)
 - [Ansible version >=2.9.0](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
   Note: If using an ubuntu based distro, the latest PPA is for 19.10 and didn't work with my 20.04 distro. Ansible was successfully installed with 
-  shell $ sudo pip3 install ansible
+  `shell $ sudo pip3 install ansible
 
 
 
