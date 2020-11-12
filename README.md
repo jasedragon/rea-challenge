@@ -1,6 +1,26 @@
 REA Systems Engineer practical task
 ===================================
 
+
+pre-reqs
+linux dev machine, 
+aws cli/credentials, 
+terraform, ansible
+
+vpc
+iam role
+security group
+
+assumptions/design choices:
+using terraform/ansible (widely applicable & agent-less tool) rather than cloudformation (AWS specific)
+ec2 versus docker or serverless https://docs.aws.amazon.com/lambda/latest/dg/lambda-ruby.html
+ec2 std OS rather than custom image
+existing vpc - simplify the problem
+load balancer?
+
+
+
+
 Provision a new application server and deploy the application in this Git repository
 ------------------------------------------------------------------------------------
 - Write configuration-as-code recipes (using your preferred orchestration software) to:
