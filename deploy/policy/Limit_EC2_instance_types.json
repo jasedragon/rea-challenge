@@ -1,0 +1,22 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "ec2:*"
+        ],
+        "Resource": "*",
+        "Condition": {
+          "StringEquals": {
+            "ec2:InstanceType": [
+              "t3.nano",
+              "t3a.nano",
+              "t3.micro",
+              "t3a.micro"
+            ]
+          }
+        }
+      }
+    ]
+  }
