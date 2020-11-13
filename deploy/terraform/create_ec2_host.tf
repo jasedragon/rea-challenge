@@ -45,3 +45,12 @@ resource "aws_instance" "ec2machine" {
   }
 }
 
+
+# call Ansible for OS setup and App install
+
+output "Public IP" {
+  value = aws_eip.ip.public_ip
+}
+
+
+
