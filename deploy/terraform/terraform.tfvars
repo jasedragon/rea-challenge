@@ -2,7 +2,7 @@ aws_region  = "ap-southeast-2"
 hostname = "sinatra"
 default_AMI = "ami-07fbdcfe29326c4fb"
 root_volume_size = "12"
-default_instance_type = "t3a.nano"
+default_instance_type = "t2.micro"
 
 # variable "hostname" {
 #   default = "sinatra"
