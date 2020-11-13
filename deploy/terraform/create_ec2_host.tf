@@ -1,9 +1,29 @@
 #####################################################
-###############     TERRAFORM     ###################
 ###############  Create EC2 Host  ###################
 #####################################################
 
-# Note: AWS Region is set by the aws cli configuration
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.15.0"
+    }
+  }
+}
+
+provider "aws" {
+    profile = "default"
+    region  = "ap-southeast-2" 
+}
+
+variable "aws_region"  {}
+variable "hostname"    {}
+variable "default_AMI" {}
+variable "root_volume_size" {}
+variable "default_instance_type" {}
+variable "ssh_key_name" {}
+
+
 # `terraform plan` will prompt for ssh key_name 
 resource "aws_instance" "ec2machine" {
   ami            = var.default_AMI
