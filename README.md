@@ -2,21 +2,57 @@ REA Systems Engineer practical task
 ===================================
 
 - Provide documentation:
-  - Instructions for the reviewer which explain how your code should be executed
-  - Requirements for running. (AWS account? Base images? Other tooling pre-installed?)
+ 
   - Explanation of assumptions and design choices.
 
+Instructions for the reviewer which explain how your code should be executed
+============
 
+
+Requirements for running. (AWS account? Base images? Other tooling pre-installed?)
+============
+
+  - Tools:
+      terraform, ansible
+      Install the required tools 
+
+These instructions assume the developer is using a Linux OS. 
+Windows/OSX users are encouraged to utilise a suitable docker or vm image.
+
+A successful deploy requires local installation of the following tools
+- [AWS cli version 2](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html)
+- [Terraform version >=0.13.0](https://www.terraform.io/downloads.html)
+- [Ansible version >=2.9.0](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+  Note: If using an ubuntu based distro, the latest PPA is for 19.10 and didn't work with my 20.04 distro. Ansible was successfully installed with `$ sudo pip3 install ansible`
+
+
+
+
+
+
+      aws cli/credentials, 
+      vpc
+      iam role
+      subnets - using default
+      security groups
+      DNS - setup a CNAME in your dns provider to point to AWS fqdn.
+
+  - AWS account:
+
+  - SSH Keypair: 
+      In order to configure the OS and deploy the Sinatra application, an ssh keypair is required. Instructions for generating one can be found [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#new-console) Ensure you download the private key in pem format and take note of the AWS "Name" for the keypair as this is required when Terraform creates the EC2 machine. 
 
 New Heading
 ===========
 The application will be installed on an AWS EC2 machine. The AWS account will have sufficient permissions to stop/start and create/destroy EC2 instances, as well as associating the EC2 instances with a pre-defined AWS security group. 
 
-In order to control costs, instance types will be limited by IAM policy.  (WIP)
+In order to control costs, instance types will be limited by IAM policy. (WIP)
 
 As AWS EC2 images (AMIs) are region specific, changing the region will require replacing the AMI with the correct value for the new region in the code.
 
-It is assumed that the ssh private key for the AWS account is available to the developer, and that an appropriate VPC exists in the AWS region of choice. 
+
+ 
+and that an appropriate VPC exists in the AWS region of choice. e 
 
 version pinning - idempotency....
 
@@ -31,7 +67,7 @@ Deploy the application to AWS
 =============================
 ```shell 
 $ git clone https://github.com/jasedragon/rea-challenge.git
-$ cd deploy
+$ cd deploy/terraform
 $ terraform init # only once
 $ terraform plan
 $ terraform apply
@@ -50,16 +86,7 @@ Reminder: NEVER store credentials in your code repo.
 
 outputs - fqdn, ip address. Register output vars...
 
-pre-reqs
-aws cli/credentials, 
-ssh key for ansible operations
-terraform, ansible
 
-vpc
-iam role
-subnets - using default
-security groups
-DNS - setup a CNAME in your dns provider to point to AWS fqdn.
 
 assumptions/design choices:
 using terraform/ansible (widely applicable & agent-less tools) rather than cloudformation (AWS specific)
@@ -122,19 +149,6 @@ We rate the solution and documentation against all the following categories:
 The documentation is as important as the scripts. We are looking to understand why you chose a certain solution and what trade offs it has.
 
 Documenting any known short comings of a solution and the reasons why will be seen as more positive than unmentioned issues. 
-
-Install the required tools 
-==========================
-These instructions assume the developer is using a Linux OS. 
-Windows/OSX users are encouraged to utilise a suitable docker or vm image.
-
-A successful deploy requires local installation of the following tools
-- [AWS cli version 2](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html)
-- [Terraform version >=0.13.0](https://www.terraform.io/downloads.html)
-- [Ansible version >=2.9.0](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
-  Note: If using an ubuntu based distro, the latest PPA is for 19.10 and didn't work with my 20.04 distro. Ansible was successfully installed with `$ sudo pip3 install ansible`
-
-
 
 
 
