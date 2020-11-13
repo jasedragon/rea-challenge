@@ -1,3 +1,6 @@
 Gemfile.lock
 .sw*
 deploy/terraform/.terraform/plugins/*
+deploy/terraform/terraform.tfstate
+deploy/terraform/terraform.tfstate.backup
+deploy/terraform/.terraform.tfstate.lock.info
