@@ -1,5 +1,8 @@
-REA Systems Engineer practical task
-===================================
+Deploy the "Sinatra" app to AWS Cloud
+=====================================
+
+
+Terraform/Ansible 'hole'. When using the null resource method, terraform is unaware of changes to the ansible configuration. In order to trigger terraform to re-run ansible after changes, the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner` Obviously not ideal.
 
 - Provide documentation:
  
@@ -40,7 +43,7 @@ A successful deploy requires local installation of the following tools
   - AWS account:
 
   - SSH Keypair: 
-      In order to configure the OS and deploy the Sinatra application, an ssh keypair is required. Instructions for generating one can be found [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#new-console) Ensure you download the private key in pem format and take note of the AWS "Name" for the keypair as this is required when Terraform creates the EC2 machine. 
+      In order to configure the OS and deploy the Sinatra application, an ssh keypair is required. Instructions for generating one can be found [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#new-console) Ensure you download the private key in pem format and take note of the AWS "Name" for the keypair and set that in the [vars file](deploy/terraform/terraform.tfvars)
 
 New Heading
 ===========
