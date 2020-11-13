@@ -8,12 +8,10 @@
         ],
         "Resource": "*",
         "Condition": {
-          "StringEquals": {
+          "ForAllValues:StringLike": {
             "ec2:InstanceType": [
-              "t3.nano",
-              "t3a.nano",
-              "t3.micro",
-              "t3a.micro"
+              "*.nano",
+              "*.micro"
             ]
           }
         }
