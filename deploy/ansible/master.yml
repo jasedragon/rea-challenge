@@ -1,0 +1,102 @@
+# We use "hosts: all" as terraform passes ansible a list of exactly one host
+- hosts: all
+  #gather_facts: true # https://github.com/zzet/ansible-rbenv-role/issues/37
+  become: true  # super user required for most tasks
+
+
+####################### Variables ######################################################
+  vars:
+    appname: 'sinatra'
+
+    swap_file_path: /swapfile1
+    swap_file_size_mb: 512
+
+####################### BEGIN BUILD ######################################################
+  pre_tasks:
+    - name: Set timezone to Australia/Melbourne
+      timezone:
+        name: Australia/Melbourne
+
+####################### Make SWAP ######################################################
+    - name: Create swap file
+      command: "dd if=/dev/zero of={{ swap_file_path }} bs=1024 count={{ swap_file_size_mb }}k"
+      args:
+        creates: "{{ swap_file_path }}"
+      tags:
+        - swap.file.create
+
+
+    - name: Change swap file permissions
+      file: path="{{ swap_file_path }}"
+            owner=root
+            group=root
+            mode=0600
+      tags:
+        - swap.file.permissions
+
+
+    - name: "Check swap file type"
+      command: file {{ swap_file_path }}
+      register: swapfile
+      tags:
+        - swap.file.mkswap
+
+
+    - name: Make swap file
+      command: "sudo mkswap {{ swap_file_path }}"
+      when: swapfile.stdout.find('swap file') == -1
+      tags:
+        - swap.file.mkswap
+
+
+    - name: Write swap entry in fstab
+      mount: name=none
+            src={{ swap_file_path }}
+            fstype=swap
+            opts=sw
+            passno=0
+            dump=0
+            state=present
+      tags:
+        - swap.fstab
+
+
+    - name: Mount swap
+      command: "swapon {{ swap_file_path }}"
+      when: ansible_swaptotal_mb < 1
+      tags:
+        - swap.file.swapon
+
+####################### Packages #######################################################
+    - name: Update all packages to the latest version
+      environment: 
+        DEBIAN_FRONTEND: 'noninteractive'
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Ensure build deps are installed
+      environment: 
+        DEBIAN_FRONTEND: 'noninteractive'
+      apt:
+        install_recommends: no
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - apt-transport-https
+        - ruby2.7
+        - fail2ban
+
+    ############ Deploy Sinatra Application ######
+
+
+    ############ Configure fail2ban ##############
+    # - name: Tweak fail2ban to catch ssh preauth failures
+    #   copy:
+    #     src: fail2ban-sshd.conf
+    #     dest: /etc/fail2ban/filter.d/sshd.conf
+
+    # Reboot 
+    - name: Reboot to apply any system/security updates
+      reboot:
+        reboot_timeout: 120
