@@ -1,12 +1,16 @@
-#####################################################
-###############  Create EC2 Host  ###################
-#####################################################
+#######################################################
+# This script configures the EC2 machine, then hands 
+# control to Ansible for configuration of said machine.
 
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 3.15.0"
+    }
+    null = {
+      source = "hashicorp/null"
+      version = "~> 3.0.0"
     }
   }
 }
@@ -16,15 +20,17 @@ provider "aws" {
     region  = "ap-southeast-2" 
 }
 
+# these are populated with values in terraform.tfvars
 variable "aws_region"  {}
 variable "hostname"    {}
 variable "default_AMI" {}
 variable "root_volume_size" {}
 variable "default_instance_type" {}
 variable "ssh_key_name" {}
+variable "ansible_ssh_user" {}
 
 
-# `terraform plan` will prompt for ssh key_name 
+# Create the EC2 machine
 resource "aws_instance" "ec2machine" {
   ami            = var.default_AMI
   instance_type  = var.default_instance_type
@@ -46,7 +52,17 @@ resource "aws_instance" "ec2machine" {
 }
 
 
-# call Ansible for OS setup and App install
+# Call Ansible for OS setup and App install
+resource "null_resource" "run-provisioner" {
+  provisioner "local-exec" {
+    command = "sleep 10;  ansible-playbook -u '${var.ansible_ssh_user}' --private-key $KEY -i '${aws_instance.ec2machine.public_ip},' ../ansible/master.yml"
+
+    environment = {
+      ANSIBLE_HOST_KEY_CHECKING = "False"
+      KEY = "~/.ssh/${var.ssh_key_name}.pem"
+    }
+  }
+}
 
 output "Public_IP" {
   value = aws_instance.ec2machine.public_ip
