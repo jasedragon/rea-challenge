@@ -10,11 +10,17 @@ REA Systems Engineer practical task
 
 New Heading
 ===========
-The application will be installed on an AWS EC2 machine. The AWS account will have sufficient permissions to stop/start and create/destroy EC2 instances, as well as associating the EC2 instances with a pre-defined AWS security group. In order to control costs, instance types will be limited by IAM policy.  
+The application will be installed on an AWS EC2 machine. The AWS account will have sufficient permissions to stop/start and create/destroy EC2 instances, as well as associating the EC2 instances with a pre-defined AWS security group. 
+
+In order to control costs, instance types will be limited by IAM policy.  (WIP)
+
 As AWS EC2 images (AMIs) are region specific, changing the region will require replacing the AMI with the correct value for the new region in the code.
-It is assumed that the credentials for an AWS account are available to the developer, and that an appropriate VPC this account exists in the AWS region of choice.  
+
+It is assumed that the ssh private key for the AWS account is available to the developer, and that an appropriate VPC exists in the AWS region of choice. 
+
 version pinning - idempotency....
-No requirement for interactive login was mentioned in the spec, accordingly the ssh service will be disabled and firewalled once the OS and application are configured. This has significant security benefits in terms of preventing hostile login attempts, however it also means the OS should be considered immutable i.e. non-upgradeable, and security updates can only be acheived by destroying the EC2 instance and creating a new one. This process could in the future be made seamless by implementing blue/green deploys in conjuction with AWS loadbalancer, or even an EC2 based nginx instance. 
+
+No requirement for interactive login was mentioned in the spec, accordingly the ssh service will be disabled and firewalled once the OS and application are configured. This has significant security benefits in terms of preventing hostile login attempts, however it also means the OS should be considered immutable i.e. non-upgradeable, and security updates can only be acheived by destroying the EC2 instance and creating a new one. This process could in the future be made seamless by implementing blue/green deploys in conjuction with AWS loadbalancer or EC2 based nginx instance. 
 
 DNS options.
 
@@ -30,7 +36,7 @@ $ terraform init # only once
 $ terraform plan
 $ terraform apply
 ```
-CONFIRM LOCAL STORAGE RECORDS CREDENTIALS, and if so provide appropriate warning.
+CONFIRM LOCAL STORAGE RECORDS CREDENTIALS, and if so provide appropriate warning. Add confidential files to gitignore.
 
 Script 
 inputs - if aws cli is unconfigured, or you wish to use alternative credentials then supply the following environment variables, or leave them unconfigured and terraform will prompt for them. 
@@ -42,14 +48,16 @@ $ export AWS_DEFAULT_REGION=ap-southeast-2
 
 Reminder: NEVER store credentials in your code repo.
 
-outputs - fqdn, ip address. 
+outputs - fqdn, ip address. Register output vars...
 
 pre-reqs
 aws cli/credentials, 
+ssh key for ansible operations
 terraform, ansible
 
 vpc
 iam role
+subnets - using default
 security groups
 DNS - setup a CNAME in your dns provider to point to AWS fqdn.
 
