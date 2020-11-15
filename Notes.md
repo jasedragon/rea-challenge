@@ -1,10 +1,18 @@
 service management - passenger/puma
 more mature environment with secure log server, green/blue deploys behind load balancer, managed by auto-scaling groups - would allow immutable server.
 
+, as well as associating the EC2 instances with a pre-defined AWS security group. 
 
-aws cli/credentials, 
-vpc
-iam role
+which python?
+puma server/systemd
+
+
+installing system ruby 
+rather than from source 
+same for version manager rvm / rbenv
+
+
+
 subnets - using default
 security groups
 DNS - setup a CNAME in your dns provider to point to AWS fqdn.
@@ -14,8 +22,6 @@ and that an appropriate VPC exists in the AWS region of choice. e
 version pinning - idempotency....
 
 remote logging
-
-ec2 versus docker 
 
 ec2 std OS rather than custom image
 internal firewall

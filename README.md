@@ -2,7 +2,7 @@
 
 Note: This is a demo application and not intended for production use.
 
-Here's the TLDR, see below for full explanation.
+## TLDR
 
 ```shell 
 $ git clone https://github.com/jasedragon/rea-challenge.git
@@ -16,6 +16,7 @@ $ terraform apply
 ## Assumptions, Design Choices & Shortcomings
 
 ### Hosting Environment
+* The application will be installed on an AWS EC2 machine. A docker container would also be suitable if that was the preference. 
 * There are no specific local or international regulatory requirements (PCI-DSS, HIPAA, GDPR etc..) that would impose restrictions on hosting environment.
 * Users are predominantly local i.e located in Australia, as such the code is configured to deploy to the AWS datacenter in Sydney.
 * Note: AWS EC2 images (AMIs) are region specific, changing the region will require replacing the AMI with the correct value for the new region in the code.
@@ -27,8 +28,6 @@ $ terraform apply
 * In order to control costs, instance types will be [limited by IAM policy](deploy/policy/Limit_EC2_instance_types.json). (WIP)
 * In order to configure the OS and deploy the Sinatra application, an ssh keypair is required. Instructions for generating one can be found [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#new-console) Ensure you download the private key in pem format and take note of the AWS "Name" for the keypair and set that in the [vars file](deploy/terraform/terraform.tfvars)
 
-, as well as associating the EC2 instances with a pre-defined AWS security group. 
-* The application will be installed on an AWS EC2 machine.
 
 ### Dev Environment
 These instructions assume the developer is using a Linux OS. 
@@ -63,13 +62,10 @@ No SSL was specified. Unless there are particular reasons to NOT use
 
 There are many valid reasons for choosing one OS over another. Amazon Linux or RedHat would be perfectly fine, however Ubuntu 20.04 LTS was selected based on this developers' most recent experience. Although the spec calls for an OS, a case could be made that building the application as an [AWS Lambda function on the ruby runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-ruby.html) may provide security, mantainability or cost advantages. 
 
-  - of the deployment tools..
 
 
 SGs & local iptables? internal port forward e.g. 8080 so app can run unpriviledged. 
 
-Requirements for running. (AWS account? Base images? Other tooling pre-installed?)
-============
 Instructions for the reviewer which explain how your code should be executed
 ============
 
