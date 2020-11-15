@@ -40,9 +40,15 @@ A successful deploy requires local installation of the following tools
 * [Ansible version >=2.9.0](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
   Note: If using an ubuntu based distro, the latest PPA is for 19.10 and didn't work with my 20.04 distro. Ansible was successfully installed with `$ sudo pip3 install ansible`
 
+
 The choice to use Terraform and Ansible rather than AWS Cloudformation is due to the former being cloud agnostic rather than AWS specific. This provides flexibility in choice of cloud provider & leads to greater code reusability. There are many other options for IAC and server configuration, however many of these require substantial supporting infrastructure or installation of agents on destination servers. In contrast Terrafom needs only AWS credentials and Ansible requires only ssh access and that python3 be installed on destination server.
 
-A shortcoming of this tooling choice is the Terraform/Ansible handoff. In this codebase, once Terraform has created the base EC2 machine it then calls Ansible to complete the configuration of it. This can be seen near the end of [create_ec2_host.tf](deploy/terraform/create_ec2_host.tf) When using the null resource method, Terraform is unaware of changes to the Ansible configuration. In order to trigger Terraform to re-run Ansible after changes, the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner` Obviously not ideal. An additional concern with Terraform is the storage of credentials in the the state files - it is CRITICALLY IMPORTANT that these state files are not submitted to the code repository, so [gitignore](./.gitignore) entries exist for these files. Note also that here Terraform is initialised with the default local backend which is not really suitable for multi-developer access. It is a faily simple matter to enable remote backend on encrypted S3 storage, with dynamodb locking.
+
+A shortcoming of this tooling choice is the Terraform/Ansible handoff. In this codebase, once Terraform has created the base EC2 machine it then calls Ansible to complete the configuration of it. This can be seen near the end of [create_ec2_host.tf](deploy/terraform/create_ec2_host.tf) 
+When using the null resource method, Terraform is unaware of changes to the Ansible configuration. In order to trigger Terraform to re-run Ansible after changes to [master.yml](deploy/ansible/master.yml), the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner` Obviously not ideal. 
+An additional concern with Terraform is the storage of credentials in the the state files - it is CRITICALLY IMPORTANT that these state files are not submitted to the code repository, so [gitignore](./.gitignore) entries exist for these files. 
+Note also that here Terraform is initialised with the default local backend which is not really suitable for multi-developer access. 
+It is a faily simple matter to enable remote backend on encrypted S3 storage, with dynamodb locking.
 
 
 
