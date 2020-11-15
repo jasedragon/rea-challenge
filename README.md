@@ -1,14 +1,37 @@
-Deploy the "Sinatra" app to AWS Cloud
-=====================================
+Deploy Sinatra Application to AWS Cloud
+=======================================
+Note: This is a demo application and not intended for production use.
 
-Assumptions
-===========
-regulatory environment
-ubuntu OS
+Here's the TLDR, see below for full explanation.
 
-Shortcomings
-============
-Terraform/Ansible handoff. When using the null resource method, terraform is unaware of changes to the ansible configuration. In order to trigger terraform to re-run ansible after changes, the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner` Obviously not ideal.
+```shell 
+$ git clone https://github.com/jasedragon/rea-challenge.git
+$ cd deploy/terraform
+$ terraform init # only once
+$ terraform apply
+```
+
+
+Assumptions Design Choices & Shortcomings
+=========================================
+No specific local or international regulatory requirements (PCI-DSS, HIPAA, GDPR etc..) that would impose restrictions on hosting environment.
+Users are predominantly local i.e located in Australia
+
+assumptions/design choices:
+using terraform/ansible (widely applicable & agent-less tools) rather than cloudformation (AWS specific)
+terraform backend - local, single user versus remote (S3/dynamodb)
+
+  - of the env..
+SSL should be used by default even when no sensitive data (e.g. logins) are being sent over the network.
+In addition to protecting privacy SSL also enhances data integrity by providing verification of server domain as well as mitigating man-in-the-middle attacks. 
+No SSL was specified. Unless there are particular reasons to NOT use 
+
+The spec calls for an OS & there are many valid reasons for choosing one OS over another. Amazon Linux or RedHat would be perfectly fine, however Ubuntu 20.04 LTS was selected based on this developers' most recent experience. 
+A case could be made that building the application as an [AWS Lambda function on the ruby runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-ruby.html) may provide security, mantainability and cost advantages. 
+
+  - of the deployment tools..
+  These instructions assume the developer is using a Linux OS. Windows/OSX users are encouraged to utilise a suitable docker or vm image.
+  using terraform/ansible (widely applicable & agent-less tools) rather than cloudformation (AWS specific).Terraform/Ansible handoff. When using the null resource method, terraform is unaware of changes to the ansible configuration. In order to trigger terraform to re-run ansible after changes, the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner` Obviously not ideal. An additional concern with Terraform is the storage of credentials in the the state files - it is CRITICALLY IMPORTANT that these state files are not submitted to the code repository, so [gitignore](./.gitignore) entries exist for these files.
 
 security posture ssl privacy client protection
 SGs & local iptables? internal port forward e.g. 8080 so app can run unpriviledged. 
@@ -48,18 +71,6 @@ DNS options.
 The amazon cloudwatch service requires port BLAH to be open and the WASM service to be running
 
 
-Deploy the application to AWS
-=============================
-```shell 
-$ git clone https://github.com/jasedragon/rea-challenge.git
-$ cd deploy/terraform
-$ terraform init # only once
-$ terraform plan
-$ terraform apply
-```
-CONFIRM LOCAL STORAGE RECORDS CREDENTIALS, and if so provide appropriate warning. Add confidential files to gitignore.
-
-Script 
 inputs - if aws cli is unconfigured, or you wish to use alternative credentials then supply the following environment variables, or leave them unconfigured and terraform will prompt for them. 
 ```shell 
 $ export AWS_ACCESS_KEY_ID=AKIAIOUQNJUMMEXAMPLE
@@ -67,27 +78,5 @@ $ export AWS_SECRET_ACCESS_KEY=3rUIXtGv42kVb/XAAFCE1/BzoDmm5FL5xEXAMPLEKEY
 $ export AWS_DEFAULT_REGION=ap-southeast-2
 ```
 
-Reminder: NEVER store credentials in your code repo.
-
 outputs - fqdn, ip address. Register output vars...
-
-assumptions/design choices:
-using terraform/ansible (widely applicable & agent-less tools) rather than cloudformation (AWS specific)
-terraform backend - local, single user versus remote (S3/dynamodb)
-
-The spec calls for an OS, so that is what is implemented here. A case could be made that building the application as an [AWS Lambda function on the ruby runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-ruby.html) may provide security, mantainability and cost advantages.
-
-ec2 versus docker 
-
-ec2 std OS rather than custom image
-internal firewall
-
-existing vpc - simplify the problem
-load balancer?
-
-idempotency - blow away and rebuild versus atomic build steps
-also allows for enhanced security but disabling all access (i.e. ssh) except on port 80
-but what about cloudwatch? do we keep the aws client running?
-
-
 

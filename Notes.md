@@ -9,6 +9,19 @@ and that an appropriate VPC exists in the AWS region of choice. e
 
 version pinning - idempotency....
 
+remote logging
+
+ec2 versus docker 
+
+ec2 std OS rather than custom image
+internal firewall
+
+existing vpc - simplify the problem
+load balancer?
+
+idempotency - blow away and rebuild versus atomic build steps
+also allows for enhanced security but disabling all access (i.e. ssh) except on port 80
+but what about cloudwatch? do we keep the aws client running?
 
 outputs - fqdn, ip address. Register output vars...
 
