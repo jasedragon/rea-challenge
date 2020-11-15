@@ -2,28 +2,20 @@ Deploy the "Sinatra" app to AWS Cloud
 =====================================
 
 
+Assumptions
+===========
 regulatory environment
-security posture ssl privacy client protection
 
-
-
-Terraform/Ansible 'hole'. When using the null resource method, terraform is unaware of changes to the ansible configuration. In order to trigger terraform to re-run ansible after changes, the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner` Obviously not ideal.
-
-- Provide documentation:
- 
-  - Explanation of assumptions and design choices.
-
-Instructions for the reviewer which explain how your code should be executed
+Shortcomings
 ============
+Terraform/Ansible handoff. When using the null resource method, terraform is unaware of changes to the ansible configuration. In order to trigger terraform to re-run ansible after changes, the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner` Obviously not ideal.
+
+security posture ssl privacy client protection
+SGs & local iptables? internal port forward e.g. 8080 so app can run unpriviledged. 
 
 
 Requirements for running. (AWS account? Base images? Other tooling pre-installed?)
 ============
-
-  - Tools:
-      terraform, ansible
-      Install the required tools 
-
 These instructions assume the developer is using a Linux OS. 
 Windows/OSX users are encouraged to utilise a suitable docker or vm image.
 
@@ -32,6 +24,19 @@ A successful deploy requires local installation of the following tools
 - [Terraform version >=0.13.0](https://www.terraform.io/downloads.html)
 - [Ansible version >=2.9.0](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
   Note: If using an ubuntu based distro, the latest PPA is for 19.10 and didn't work with my 20.04 distro. Ansible was successfully installed with `$ sudo pip3 install ansible`
+
+
+  - AWS account:
+
+  - SSH Keypair: 
+      In order to configure the OS and deploy the Sinatra application, an ssh keypair is required. Instructions for generating one can be found [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#new-console) Ensure you download the private key in pem format and take note of the AWS "Name" for the keypair and set that in the [vars file](deploy/terraform/terraform.tfvars)
+
+
+Instructions for the reviewer which explain how your code should be executed
+============
+
+
+
 
 
 
@@ -45,10 +50,6 @@ A successful deploy requires local installation of the following tools
       security groups
       DNS - setup a CNAME in your dns provider to point to AWS fqdn.
 
-  - AWS account:
-
-  - SSH Keypair: 
-      In order to configure the OS and deploy the Sinatra application, an ssh keypair is required. Instructions for generating one can be found [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#new-console) Ensure you download the private key in pem format and take note of the AWS "Name" for the keypair and set that in the [vars file](deploy/terraform/terraform.tfvars)
 
 New Heading
 ===========
@@ -151,12 +152,9 @@ We rate the solution and documentation against all the following categories:
 - Code / documentation layout
 - Ease of deployment
 - Idempotency - blow whole server away on change. Not the best example but see how we go for time.
-- Security - SGs & local iptables? internal port forward e.g. 8080 so app can run unpriviledged. 
+- Security - 
 - Anti-fragility - version pinning? or is this concerning e.g. self-restarting app (init/systemd)
 
-The documentation is as important as the scripts. We are looking to understand why you chose a certain solution and what trade offs it has.
-
-Documenting any known short comings of a solution and the reasons why will be seen as more positive than unmentioned issues. 
 
 
 
