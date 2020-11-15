@@ -31,15 +31,6 @@ A successful deploy requires local installation of the following tools
 
 Instructions for the reviewer which explain how your code should be executed
 ============
-      aws cli/credentials, 
-      vpc
-      iam role
-      subnets - using default
-      security groups
-      DNS - setup a CNAME in your dns provider to point to AWS fqdn.
-
-New Heading
-===========
 The application will be installed on an AWS EC2 machine. The AWS account will have sufficient permissions to stop/start and create/destroy EC2 instances, as well as associating the EC2 instances with a pre-defined AWS security group. 
 
 In order to control costs, instance types will be limited by IAM policy. (WIP)

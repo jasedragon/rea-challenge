@@ -9,12 +9,6 @@ and that an appropriate VPC exists in the AWS region of choice. e
 
 version pinning - idempotency....
 
-No requirement for interactive login was mentioned in the spec, accordingly the ssh service will be disabled and firewalled once the OS and application are configured. This has significant security benefits in terms of preventing hostile login attempts, however it also means the OS should be considered immutable i.e. non-upgradeable, and security updates can only be acheived by destroying the EC2 instance and creating a new one. This process could in the future be made seamless by implementing blue/green deploys in conjuction with AWS loadbalancer or EC2 based nginx instance. 
-
-DNS options.
-
-The amazon cloudwatch service requires port BLAH to be open and the WASM service to be running
-
 
 outputs - fqdn, ip address. Register output vars...
 
