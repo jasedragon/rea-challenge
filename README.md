@@ -2,6 +2,11 @@ Deploy the "Sinatra" app to AWS Cloud
 =====================================
 
 
+regulatory environment
+security posture ssl privacy client protection
+
+
+
 Terraform/Ansible 'hole'. When using the null resource method, terraform is unaware of changes to the ansible configuration. In order to trigger terraform to re-run ansible after changes, the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner` Obviously not ideal.
 
 - Provide documentation:
@@ -146,8 +151,8 @@ We rate the solution and documentation against all the following categories:
 - Code / documentation layout
 - Ease of deployment
 - Idempotency - blow whole server away on change. Not the best example but see how we go for time.
-- Security - SGs & local iptables?
-- Anti-fragility - version pinning?
+- Security - SGs & local iptables? internal port forward e.g. 8080 so app can run unpriviledged. 
+- Anti-fragility - version pinning? or is this concerning e.g. self-restarting app (init/systemd)
 
 The documentation is as important as the scripts. We are looking to understand why you chose a certain solution and what trade offs it has.
 
