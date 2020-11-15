@@ -1,3 +1,7 @@
+service management - passenger/puma
+more mature environment with secure log server, green/blue deploys behind load balancer, managed by auto-scaling groups - would allow immutable server.
+
+
 aws cli/credentials, 
 vpc
 iam role
