@@ -1,0 +1,33 @@
+[Unit]
+Description=Puma HTTP Server
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=sinatra
+Group=staff
+WorkingDirectory=/home/sinatra/app
+
+# Helpful for debugging socket activation, etc.
+Environment=PUMA_DEBUG=1
+
+ExecStart=/usr/bin/bundle exec puma -C /home/sinatra/app/config/puma.rb -b "unix:///var/www/sockets/puma_sinatra.sock" -e production
+UMask=0002
+
+# Greatly reduce Ruby memory fragmentation and heap usage
+# https://www.mikeperham.com/2018/04/25/taming-rails-memory-bloat/
+Environment=MALLOC_ARENA_MAX=2
+
+RestartSec=1
+Restart=always
+
+
+# output goes to /var/log/syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=puma_sinatra
+
+
+
+[Install]
+WantedBy=multi-user.target
