@@ -4,6 +4,7 @@ Deploy the "Sinatra" app to AWS Cloud
 Assumptions
 ===========
 regulatory environment
+ubuntu OS
 
 Shortcomings
 ============
