@@ -1,28 +1,11 @@
 # We use "hosts: all" as terraform passes ansible a list of exactly one host
 - hosts: all
   become: true  # super user required for most tasks
-  pre_tasks:
-    - name: Wait for ssh port, start after 5 seconds, max 30 seconds
-      wait_for:
-        port: 22
-        delay: 5
-        host: "{{ ec2_ip }}"
-        timeout: 30
-        connect_timeout: 30
-        search_regex: OpenSSH
-      #delegate_to: localhost
-      
-
-  
-
-
-####################### Variables ######################################################
   vars:
     appname: 'sinatra'
 
 
-####################### BEGIN BUILD ######################################################
-
+####################### BEGIN BUILD ##############
 
   tasks:
     - name: Ensure timezone is set to Australia/Melbourne
@@ -48,31 +31,77 @@
       vars:
         packages:
         - apt-transport-https
+        - fail2ban
+        - nginx
         - ruby2.7
         - ruby-bundler
-        - fail2ban
+        
 
+    ###### Workaround systemd/nginx race condition
+    - name: Ensure nginx service override dir exists 
+      file: 
+        path: /etc/systemd/system/nginx.service.d/ 
+        state: directory
+        mode: '0755'
+
+    ## introduces a 0.1 second pause on (re)start
+    - name: Copy nginx-service-override.conf
+      copy:
+        src: files/nginx-service-override.conf
+        dest: /etc/systemd/system/nginx.service.d/override.conf
+        mode: '0644'
+
+
+     ######### Run Sinatra app as non-admin user ###### 
+    - name: Create Sinatra User
+      user:
+        name: sinatra
+        state: present
+        shell: /bin/bash
+        uid: 1001
+        groups: staff
+        append: yes
 
     ############ Deploy Sinatra Application ######
     - name: Copy App directory to homedir
       copy:
         src: ../../app
-        dest: /home/ubuntu/
+        dest: /home/sinatra/
         mode: 0440
-        owner: 'ubuntu'
-        group: 'ubuntu'
+        owner: 'sinatra'
+        group: 'sinatra'
 
     - name: Install app bundle
-      shell: cd /home/ubuntu/app && bundle install
-      become_user: ubuntu
+      shell: cd /home/sinatra/app && bundle install
+      become_user: ubuntu    # has sudo for gem install
       args:
         creates: /var/lib/gems/2.7.0/gems/sinatra-*
 
+    ### This will be replaced by systemd/puma
     - name: Launch Sinatra app
-      shell: cd /home/ubuntu/app && bundle exec rackup
-      become_user: ubuntu
+      shell: cd /home/sinatra/app && bundle exec rackup &
+      become_user: sinatra
       # args:
       #   creates: /var/lib/gems/2.7.0/gems/sinatra-2.1.0
+
+#################### Puma systemd scripts #######################################
+    - name: Create puma socket directory
+      file: 
+        path: /var/www/sockets/ 
+        group: staff 
+        state: directory
+        mode: 0775
+
+    - name: Copy puma init script
+      copy:
+        src: files/systemd-puma
+        dest: /etc/systemd/system/puma_sinatra.service
+
+    - name: Enable service puma_sinatra
+      service:
+        name: puma_sinatra
+        enabled: yes
+
 
     #### determine if we should reboot - trigger on ANY upgrade ####
     - debug:
