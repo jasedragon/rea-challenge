@@ -1,7 +1,19 @@
 # We use "hosts: all" as terraform passes ansible a list of exactly one host
 - hosts: all
-  #gather_facts: true # https://github.com/zzet/ansible-rbenv-role/issues/37
   become: true  # super user required for most tasks
+  pre_tasks:
+    - name: Wait for ssh port, start after 5 seconds, max 30 seconds
+      wait_for:
+        port: 22
+        delay: 5
+        host: "{{ ec2_ip }}"
+        timeout: 30
+        connect_timeout: 30
+        search_regex: OpenSSH
+      #delegate_to: localhost
+      
+
+  
 
 
 ####################### Variables ######################################################
@@ -10,22 +22,24 @@
 
 
 ####################### BEGIN BUILD ######################################################
-  pre_tasks:
-    - name: Set timezone to Australia/Melbourne
+
+
+  tasks:
+    - name: Ensure timezone is set to Australia/Melbourne
       timezone:
         name: Australia/Melbourne
 
-
-
-####################### Packages #######################################################
-    - name: Update all packages to the latest version
+    ################## Packages #################
+    - name: Ensure all packages are updated to latest version
       environment: 
         DEBIAN_FRONTEND: 'noninteractive'
       apt:
         update_cache: yes
+        cache_valid_time: 3600
         upgrade: dist
+      register: apt_upgrades
 
-    - name: Ensure build deps are installed
+    - name: Ensure dependencies are installed
       environment: 
         DEBIAN_FRONTEND: 'noninteractive'
       apt:
@@ -35,18 +49,38 @@
         packages:
         - apt-transport-https
         - ruby2.7
+        - ruby-bundler
         - fail2ban
 
+
     ############ Deploy Sinatra Application ######
+    - name: Copy App directory to homedir
+      copy:
+        src: ../../app
+        dest: /home/ubuntu/
+        mode: 0440
+        owner: 'ubuntu'
+        group: 'ubuntu'
+
+    - name: Install app bundle
+      shell: cd /home/ubuntu/app && bundle install
+      become_user: ubuntu
+      args:
+        creates: /var/lib/gems/2.7.0/gems/sinatra-*
+
+    - name: Launch Sinatra app
+      shell: cd /home/ubuntu/app && bundle exec rackup
+      become_user: ubuntu
+      # args:
+      #   creates: /var/lib/gems/2.7.0/gems/sinatra-2.1.0
+
+    #### determine if we should reboot - trigger on ANY upgrade ####
+    - debug:
+        msg: "Upgraded Packages: {{ apt_upgrades.stdout }}"  
 
 
-    ############ Configure fail2ban ##############
-    # - name: Tweak fail2ban to catch ssh preauth failures
-    #   copy:
-    #     src: fail2ban-sshd.conf
-    #     dest: /etc/fail2ban/filter.d/sshd.conf
 
-    # Reboot 
-    - name: Reboot to apply any system/security updates
-      reboot:
-        reboot_timeout: 120
+    # ############# Reboot ##########
+    # - name: Reboot to apply any system/security updates
+    #   reboot:
+    #     reboot_timeout: 60
