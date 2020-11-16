@@ -1,9 +1,6 @@
-# We use "hosts: all" as terraform passes ansible a list of exactly one host
-- hosts: all
+---
+- hosts: all    # terraform passes ansible a list of exactly one host
   become: true  # super user required for most tasks
-
-
-####################### BEGIN BUILD ##############
 
   tasks:
     - name: Ensure timezone is set to Australia/Melbourne
@@ -16,7 +13,7 @@
         DEBIAN_FRONTEND: 'noninteractive'
       apt:
         update_cache: yes
-        #cache_valid_time: 3600
+        cache_valid_time: 3600
         upgrade: dist
       register: apt_upgrades
 
@@ -74,7 +71,7 @@
         uid: 1001
         groups: staff
         append: yes
-        
+
 
     ############ Deploy Sinatra Application ######
     - name: Copy App directory to homedir
@@ -117,12 +114,6 @@
       service:
         name: puma_sinatra
         enabled: yes
-
-
-    #### determine if we should reboot - trigger on ANY upgrade ####
-    # - debug:
-    #     msg: "Upgraded Packages: {{ apt_upgrades.stdout }}"  
-
 
 
     ############# Reboot ##########
