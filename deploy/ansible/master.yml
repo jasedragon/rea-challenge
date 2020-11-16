@@ -1,8 +1,6 @@
 # We use "hosts: all" as terraform passes ansible a list of exactly one host
 - hosts: all
   become: true  # super user required for most tasks
-  vars:
-    appname: 'sinatra'
 
 
 ####################### BEGIN BUILD ##############
@@ -18,7 +16,7 @@
         DEBIAN_FRONTEND: 'noninteractive'
       apt:
         update_cache: yes
-        cache_valid_time: 3600
+        #cache_valid_time: 3600
         upgrade: dist
       register: apt_upgrades
 
@@ -31,10 +29,11 @@
       vars:
         packages:
         - apt-transport-https
-        - fail2ban
         - nginx
         - ruby2.7
         - ruby-bundler
+        - puma
+        - fail2ban
         
 
     ###### Workaround systemd/nginx race condition
@@ -52,7 +51,21 @@
         mode: '0644'
 
 
-     ######### Run Sinatra app as non-admin user ###### 
+    ### nginx config overrides default & forwards requests to puma
+    - name: Copy nginx-sinatra config
+      copy:
+        src: files/nginx-sinatra
+        dest: /etc/nginx/sites-available/
+        mode: '0644'
+ 
+    - name: Replace nginx default with nginx-sinatra config
+      file:
+        src: /etc/nginx/sites-available/nginx-sinatra
+        dest: /etc/nginx/sites-enabled/default
+        state: link   
+
+
+    ######### Run Sinatra app as non-admin user ###### 
     - name: Create Sinatra User
       user:
         name: sinatra
@@ -61,15 +74,25 @@
         uid: 1001
         groups: staff
         append: yes
+        
 
     ############ Deploy Sinatra Application ######
     - name: Copy App directory to homedir
       copy:
         src: ../../app
         dest: /home/sinatra/
-        mode: 0440
+        mode: 0660
         owner: 'sinatra'
-        group: 'sinatra'
+        group: 'ubuntu'
+
+    - name: ensure Gemfile.lock exists with known permissions
+      copy:
+        content: ""
+        dest: /home/sinatra/app/Gemfile.lock
+        force: no
+        group: ubuntu
+        owner: sinatra
+        mode: 0660
 
     - name: Install app bundle
       shell: cd /home/sinatra/app && bundle install
@@ -77,14 +100,7 @@
       args:
         creates: /var/lib/gems/2.7.0/gems/sinatra-*
 
-    ### This will be replaced by systemd/puma
-    - name: Launch Sinatra app
-      shell: cd /home/sinatra/app && bundle exec rackup &
-      become_user: sinatra
-      # args:
-      #   creates: /var/lib/gems/2.7.0/gems/sinatra-2.1.0
-
-#################### Puma systemd scripts #######################################
+    #################### Puma systemd scripts #################
     - name: Create puma socket directory
       file: 
         path: /var/www/sockets/ 
@@ -104,12 +120,12 @@
 
 
     #### determine if we should reboot - trigger on ANY upgrade ####
-    - debug:
-        msg: "Upgraded Packages: {{ apt_upgrades.stdout }}"  
+    # - debug:
+    #     msg: "Upgraded Packages: {{ apt_upgrades.stdout }}"  
 
 
 
-    # ############# Reboot ##########
-    # - name: Reboot to apply any system/security updates
-    #   reboot:
-    #     reboot_timeout: 60
+    ############# Reboot ##########
+    - name: Reboot to apply any system/security updates
+      reboot:
+        reboot_timeout: 60
