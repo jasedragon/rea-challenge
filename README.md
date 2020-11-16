@@ -26,10 +26,10 @@ $ terraform apply
 * The AWS account will have sufficient permissions to stop/start and create/destroy EC2 instances in the chose AWS Region. Example [IAM policy here](deploy/policy/Restrict_Region.json).
 * In the case that the AWS account is configured for both gui and cli access, [limited access to Cloudwatch](deploy/policy/Limited_Cloudwatch.json) can be configured in order for the AWS gui to display basic EC2 monitoring information.
 * In order to control costs, instance types will be [limited by IAM policy](deploy/policy/Limit_EC2_instance_types.json). (WIP)
-* In order to configure the OS and deploy the Sinatra application, an ssh keypair is required. Instructions for generating one can be found [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#new-console) Ensure you download the private key in pem format and take note of the AWS "Name" for the keypair and set that in the [vars file](deploy/terraform/terraform.tfvars)
+* To configure the OS and deploy the Sinatra application, an ssh keypair is required. Instructions for generating one can be found [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#new-console) Ensure you download the private key in pem format and take note of the AWS "Name" for the keypair and set that in the [vars file](deploy/terraform/terraform.tfvars)
 
 
-### Dev Environment
+### Development Environment
 These instructions assume the developer is using a Linux OS. 
 Windows/OSX users are encouraged to utilise a suitable docker or vm image.
 
@@ -45,36 +45,47 @@ The choice to use Terraform and Ansible rather than AWS Cloudformation is due to
 
 A shortcoming of this tooling choice is the Terraform/Ansible handoff. In this codebase, once Terraform has created the base EC2 machine it then calls Ansible to complete the configuration of it. This can be seen near the end of [create_ec2_host.tf](deploy/terraform/create_ec2_host.tf) 
 
-When using the null resource method, Terraform is unaware of changes to the Ansible configuration. In order to trigger Terraform to re-run Ansible after changes to [master.yml](deploy/ansible/master.yml), the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner` Obviously not ideal. 
+When using the null resource method, Terraform is unaware of changes to the Ansible configuration. In order to trigger Terraform to re-run Ansible after changes to [master.yml](deploy/ansible/master.yml), the null resource needs to be marked as tainted with `terraform taint null_resource.run-provisioner`. Another unresolved problem is the need to insert a delay before calling Ansible.  Obviously not ideal.  
 
-An additional concern with Terraform is the storage of credentials in the the state files - it is CRITICALLY IMPORTANT that these state files are not submitted to the code repository, so [gitignore](./.gitignore) entries exist for these files. 
+#### Initial Deploy
+```shell 
+$ git clone https://github.com/jasedragon/rea-challenge.git
+$ cd rea-challenge/
+$ cd deploy/terraform
+$ terraform init # only once
+$ terraform apply
+```
 
-Note also that here Terraform is initialised with the default local backend which is not really suitable for multi-developer access. 
+#### Additional Deploys
+```shell 
+$ cd rea-challenge/
+$ cd deploy/terraform
+$ terraform taint null_resource.run-provisioner
+$ terraform apply
+```
+
+Another concern with Terraform is the storage of credentials in the the state files - it is **CRITICALLY IMPORTANT** that these state files are not submitted to the code repository, so [gitignore](./.gitignore) entries exist for these files. 
+
+Note also that here Terraform is initialised with the default local backend which is not suitable for multi-developer access. 
 It is a faily simple matter to enable remote backend on encrypted S3 storage, with dynamodb locking. This allows for safe multi-user development.
 
 
-
-
-  - of the env..
-SSL should be used by default even when no sensitive data (e.g. logins) are being sent over the network.
-In addition to protecting privacy SSL also enhances data integrity by providing verification of server domain as well as mitigating man-in-the-middle attacks. 
-No SSL was specified. Unless there are particular reasons to NOT use 
-
+### Operational Environment
 There are many valid reasons for choosing one OS over another. Amazon Linux or RedHat would be perfectly fine, however Ubuntu 20.04 LTS was selected based on this developers' most recent experience. Although the spec calls for an OS, a case could be made that building the application as an [AWS Lambda function on the ruby runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-ruby.html) may provide security, mantainability or cost advantages. 
 
+The Sinatra application has been configured to utilise the multi-threaded puma server, which provides performance benefits as well as the nginx proxy. Nginx listens on port 80 for http traffic and passes it via unix socket to the puma server. This arrangement has the security advantage of running Sinatra unprivileged. Puma has been configured to run under systemd management, which provide automatic restart capability as well as syslog logging.
+
+No SSL was specified. Unless there are particular reasons to NOT use SSL, it should be enabled even when no sensitive data (e.g. logins) are being sent over the network.  In addition to protecting privacy SSL also enhances data integrity by providing verification of server domain as well as mitigating man-in-the-middle attacks. 
+
+As per the spec SSL has not been implemented, however it is easily supported in the nginx config.
+ 
+No requirement for interactive login was mentioned in the spec however the ssh service currently remains available allowing for additional configuration via Ansible. SSH is configured by default to not allow root login, and logins by the 'ubuntu' user are by key only, no password access is allowed. The fail2ban service has also been installed in order to minimize network traffic associated with attempts to brute-force ssh.
+
+The ssh service could be disabled and firewalled once the OS and application are configured, however it also means the OS should be considered immutable i.e. non-upgradeable, and security updates could only be acheived by destroying the EC2 instance and creating a new one. 
 
 
-SGs & local iptables? internal port forward e.g. 8080 so app can run unpriviledged. 
-
-Instructions for the reviewer which explain how your code should be executed
-============
-
- e 
-version pinning - idempotency....
-
-No requirement for interactive login was mentioned in the spec, accordingly the ssh service will be disabled and firewalled once the OS and application are configured. This has significant security benefits in terms of preventing hostile login attempts, however it also means the OS should be considered immutable i.e. non-upgradeable, and security updates can only be acheived by destroying the EC2 instance and creating a new one. This process could in the future be made seamless by implementing blue/green deploys in conjuction with AWS loadbalancer or EC2 based nginx instance. 
+SGs.
 
 DNS options.
 
-outputs - fqdn, ip address. Register output vars...
 
