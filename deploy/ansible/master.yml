@@ -119,4 +119,4 @@
     ############# Reboot ##########
     - name: Reboot to apply any system/security updates
       reboot:
-        reboot_timeout: 60
+        reboot_timeout: 90
