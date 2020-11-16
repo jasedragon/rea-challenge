@@ -11,7 +11,8 @@ WorkingDirectory=/home/sinatra/app
 # Helpful for debugging socket activation, etc.
 Environment=PUMA_DEBUG=1
 
-ExecStart=/usr/bin/bundle exec puma -C /home/sinatra/app/config/puma.rb -b "unix:///var/www/sockets/puma_sinatra.sock" -e production
+#ExecStart=/usr/bin/bundle exec puma -C /home/sinatra/app/config/puma.rb -b "unix:///var/www/sockets/puma_sinatra.sock" -e production
+ExecStart=/usr/bin/bundle exec puma -b "unix:///var/www/sockets/puma_sinatra.sock" -e production
 UMask=0002
 
 # Greatly reduce Ruby memory fragmentation and heap usage
