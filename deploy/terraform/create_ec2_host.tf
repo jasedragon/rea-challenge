@@ -55,7 +55,7 @@ resource "aws_instance" "ec2machine" {
 # Call Ansible for OS setup and App install
 resource "null_resource" "run-provisioner" {
   provisioner "local-exec" {
-    command = "sleep 10; ansible-playbook -u '${var.ansible_ssh_user}' --private-key $KEY --extra-vars='ec2_ip=${aws_instance.ec2machine.public_ip}' -i '${aws_instance.ec2machine.public_ip},' ../ansible/master.yml"
+    command = "sleep 60; ansible-playbook -u '${var.ansible_ssh_user}' --private-key $KEY --extra-vars='ec2_ip=${aws_instance.ec2machine.public_ip}' -i '${aws_instance.ec2machine.public_ip},' ../ansible/master.yml"
 
     environment = {
       ANSIBLE_HOST_KEY_CHECKING = "False"
