@@ -73,19 +73,18 @@ It is a faily simple matter to enable remote backend on encrypted S3 storage, wi
 ### Operational Environment
 There are many valid reasons for choosing one OS over another. Amazon Linux or RedHat would be perfectly fine, however Ubuntu 20.04 LTS was selected based on this developers' most recent experience. Although the spec calls for an OS, a case could be made that building the application as an [AWS Lambda function on the ruby runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-ruby.html) may provide security, mantainability or cost advantages. 
 
-The Sinatra application has been configured to utilise the multi-threaded puma server, which provides performance benefits as well as the nginx proxy. Nginx listens on port 80 for http traffic and passes it via unix socket to the puma server. This arrangement has the security advantage of running Sinatra unprivileged. Puma has been configured to run under systemd management, which provide automatic restart capability as well as syslog logging.
+The Sinatra application has been configured to utilise the multi-threaded puma server, which provides performance benefits, as well as the nginx proxy. Nginx listens on port 80 for http traffic and passes it via unix socket to the puma server. This arrangement has the security advantage of running Sinatra unprivileged. Puma has been configured to run under systemd management, which provides automatic restart capability as well as syslog logging.
 
 No SSL was specified. Unless there are particular reasons to NOT use SSL, it should be enabled even when no sensitive data (e.g. logins) are being sent over the network.  In addition to protecting privacy SSL also enhances data integrity by providing verification of server domain as well as mitigating man-in-the-middle attacks. 
 
 As per the spec SSL has not been implemented, however it is easily supported in the nginx config once public DNS and certificate have been arranged (e.g. AWS, letsencrypt or traditional standalone SSL certificate)
  
-
 No requirement for interactive login was mentioned in the spec however the ssh service currently remains available allowing for additional configuration via Ansible. SSH is configured by default to not allow root login, and logins by the 'ubuntu' user are by key only, no password access is allowed. The fail2ban service has also been installed in order to minimize network traffic associated with attempts to brute-force ssh.
 
-The ssh service could be disabled and firewalled once the OS and application are configured, however it also means the OS should be considered immutable i.e. non-upgradeable, and security updates could only be acheived by destroying the EC2 instance and creating a new one. 
+The ssh service could be disabled and firewalled once the OS and application are configured, in that case the OS would be considered immutable i.e. non-upgradeable, and security updates could only be acheived by destroying the EC2 instance and creating a new one. 
 
 
 Last item to note pertains to AWS Security Groups. As the code currently stands it is utilising the automatically generated default SG, which allows access to ssh (port 22) and http (port 80) only from the developers ip address. This is a secure default that allows for end-to-end testing prior to opening up for wider access. 
 
-
+Enjoy your Sinatra Application!
 
